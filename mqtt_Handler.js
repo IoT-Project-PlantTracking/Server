@@ -1,11 +1,14 @@
 const { Module } = require('module')
 const mqtt = require('mqtt')
 
-const host = 't1109cc7.ala.us-east-1.emqxsl.com'
-const port = '8883'
+const host = 'test.mosquitto.org'
+const port = '1883'
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`
 
 const connectUrl = `mqtt://${host}:${port}`
+
+subscribed = false
+messageIn = "mesIn Hi"
 
 const client = mqtt.connect(connectUrl, {
   clientId,
@@ -19,20 +22,24 @@ function mqttSubscribe(subTopic) {
     client.on('connect', (onComplete, onError) => {
         if (onError) {
             console.error(onError)
+            subscribed = false
         }
         else if (onComplete) {
             console.log('Connected')
             client.subscribe([subTopic], (error) => {
                 if (error) {
                     console.error(error)
+                    subscribed = false
                 }
                 else{
-                    console.log(`Subscribe to topic '${topic}'`)
+                    console.log(`Subscribe to topic '${subTopic}'`)
+                    subscribed = true
                 }
             })
         }
         else {
             console.log("Wtf?(subscribe)")
+            subscribed = false
         }
     })
 }
@@ -40,7 +47,7 @@ function mqttSubscribe(subTopic) {
 function mqttPublish(pubTopic, message) {
     client.on('connect', () => {
         console.log('Connected')
-        client.publish(pubTopic, message, { qos: 0, retain: false }, (error) => {
+        client.publish(pubTopic, message, { qos: 1, retain: false }, (error) => {
             if (error) {
                 console.error(error)
             }
@@ -54,10 +61,14 @@ function mqttPublish(pubTopic, message) {
 function mqttListener() {
     client.on('message', (topic, payload) => {
         console.log('Received Message:', topic, payload.toString())
+        messageIn = payload.toString()
+        return messageIn
       })
 }
 
 module.exports = {
+messageIn,
+subscribed,
 mqttSubscribe,
 mqttPublish,
 mqttListener
