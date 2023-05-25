@@ -1,35 +1,33 @@
 const express = require('express');
 const app = express();
-const sql = require("mssql");
+const sql = require("mysql");
 
 //Credentials
-const sqlConfig = {
-    user: 'sql7617080',
-    password: 'viasK1CvkH',
-    database: 'sql7617080',
-    server: 'sql7.freesqldatabase.com',
-    options: {
-      encrypt: true, // for azure
-      trustServerCertificate: false // change to true for local dev / self-signed certs
-    }
-}
-const config = {
-    port: 3306
-};
+const mysqlConnection = mysql.createConnection({
+  host       : 'sql7.freesqldatabase.com',
+  user       : 'sql7617080',
+  password   : 'viasK1CvkH',
+  database   : 'sql7617080'
+});
 
-function dbCon(query) {
-    async () => {
-        try {
-            await sql.connect(sqlConfig)
-            const result = await sql.query(query)
-            return result
-        }
-        catch (error) {
-            console.log(error)
-        }
+
+function dbCon(dbQuery)
+{
+  mysqlConnection.query(dbQuery, function(error, result) {
+    if (error) {
+      throw error
     }
+    else {
+      data = JSON.parse(JSON.stringify(result))
+      console.log('Query = ' +  dbQuery + ', Result = ' + data)
+      return result
+    }
+  })
 }
 
-export {
+
+
+export
+{
     dbCon
 }
