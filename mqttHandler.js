@@ -8,7 +8,6 @@ const clientId = `mqtt_${Math.random().toString(16).slice(3)}`
 const connectUrl = `mqtt://${host}:${port}`
 
 subscribed = false
-messageIn = "mesIn Hi"
 
 const client = mqtt.connect(connectUrl, {
   clientId,
