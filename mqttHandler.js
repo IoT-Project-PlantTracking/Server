@@ -62,7 +62,7 @@ function mqttPublish(pubTopic, message) {
 function mqttListener(callback) {
     client.on('message', (topic, payload) => {
         console.log('Received Message:', topic, payload.toString())
-        let messageIn = payload.toString()
+        let messageIn = JSON.parse(payload.toString())
         callback(messageIn)
       })
 }

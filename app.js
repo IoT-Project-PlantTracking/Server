@@ -6,12 +6,27 @@ const db = require("./dbHandler")
 
 const mqttSplit = '%'
 
+const sql = require("mysql");
+
+//Credentials
+const mysqlConnection = sql.createConnection({
+  host       : 'sql7.freesqldatabase.com',
+  user       : 'sql7617080',
+  password   : 'viasK1CvkH',
+  database   : 'sql7617080'
+});
+
 mqttHandler.mqttSubscribe("/00/IoTPlant/GDAToServer")
 
 
 function dataHandler(mqttMessageIn) {
     if (mqttMessageIn !== undefined) {
         data = mqttMessageIn.split(mqttSplit)
+        console.log(data)
+        console.log(data[0])
+        console.log(data[1])
+        console.log(data[2])
+        console.log(data[3])
     
         // Things recived from the GDA is required to be in the following order:
         // message + '%' + id + '%' + moistureLevel + '%' + addWater
@@ -26,31 +41,32 @@ function dataHandler(mqttMessageIn) {
         if (data[0] == 'moistLevel') {
             // function for posting moisturelevel to db
             plantID = data[1]
-            date = new Date()
-            moistLevel = data[2]
-            addedWater = data[3]
-            console.log('Message = ' + data[0] + ' plantID = ' + plantID + ' moistLevel = ' + moistLevel + ' addedWater = ' + addedWater)
-            db.dbCon('INSERT INTO watering_record (added_water, plant_id, datetime, moisture) VALUES (' + addedWater + ', ' + plantID + ', ' + date + ', ' + moistLevel + ');')
-            db.dbCon('UPDATE Plant SET latest_m_level = ' + moistLevel + ' WHERE id = ' + plantID + ';')
-            db.dbCon('UPDATE Plant_information SET added_water_amount = ' + addedWater + ' WHERE id = ' + plantID +';')
-        }
-    
-        else if (data[0] == 'pumpFault') {
-            // function for posting pumpFault to db
-            plantID = data[1]
-            console.log("pumpFault = True")
-            db.dbCon('UPDATE Plant_information SET pump_fault = 1 WHERE id = ' + plantID + ';')
+            moistureLevel = data[2]
+            dateTime = data[3]
+            pumpFault = data[4]
+            console.log('Message = ' + data[0] + ' plantID = ' + plantID + ' moistLevel = ' + moistureLevel)
+
+            mysqlConnection.query('INSERT INTO wateringRecord (plantid, dateTime, moisture) VALUES (?, ?, ?)', [plantID, dateTime, moistureLevel], function(error) {
+                if(error) {
+                    throw error
+                }
+            })
+            mysqlConnection.query('UPDATE plant SET latestMoisture = '+ moistureLevel + ' WHERE id = '+ plantID +'', function(error) {
+                if(error) {
+                    throw error
+                }
+            })
+            mysqlConnection.query('UPDATE plant SET pumpFault = '+ pumpFault + ' WHERE id = '+ plantID +'', function(error) {
+                if(error) {
+                    throw error
+                }
+            })
         }
         else {
-            console.log("unknow mqtt request")
+            console.log("Not correct format")
         }
-    }
-    else {
-        console.log("messageIn == undefined")
-    }
-        
+    }     
 }
-
 
 mqttHandler.mqttListener(dataHandler)
 

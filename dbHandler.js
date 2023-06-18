@@ -18,7 +18,7 @@ function dbCon(dbQuery)
       throw error
     }
     else {
-      data = JSON.parse(JSON.stringify(result))
+      data = result
       console.log('Query = ' +  dbQuery + ', Result = ' + data)
       return result
     }
@@ -29,5 +29,6 @@ function dbCon(dbQuery)
 
 exports =
 {
- dbCon
+ dbCon,
+ mysqlConnection
 }
