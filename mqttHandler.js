@@ -1,11 +1,13 @@
 const { Module } = require('module')
 const mqtt = require('mqtt')
 
+
 const host = 'test.mosquitto.org'
 const port = '1883'
 const clientId = `mqtt_${Math.random().toString(16).slice(3)}`
 
 const connectUrl = `mqtt://${host}:${port}`
+
 
 subscribed = false
 
@@ -57,17 +59,15 @@ function mqttPublish(pubTopic, message) {
     })    
 }
 
-function mqttListener() {
+function mqttListener(callback) {
     client.on('message', (topic, payload) => {
         console.log('Received Message:', topic, payload.toString())
-        messageIn = payload.toString()
-        return messageIn
+        let messageIn = payload.toString()
+        callback(messageIn)
       })
 }
 
 module.exports = {
-messageIn,
-subscribed,
 mqttSubscribe,
 mqttPublish,
 mqttListener

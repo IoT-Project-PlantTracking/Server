@@ -3,7 +3,7 @@ const app = express();
 const sql = require("mysql");
 
 //Credentials
-const mysqlConnection = mysql.createConnection({
+const mysqlConnection = sql.createConnection({
   host       : 'sql7.freesqldatabase.com',
   user       : 'sql7617080',
   password   : 'viasK1CvkH',
@@ -27,7 +27,7 @@ function dbCon(dbQuery)
 
 
 
-export
+exports =
 {
-    dbCon
+ dbCon
 }
